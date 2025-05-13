@@ -14,11 +14,12 @@ openai.api_key = OPENAI_API_KEY
 
 # Поддерживаемые размеры для DALL·E-3
 SUPPORTED_SIZES = {"1024x1024", "1024x1792", "1792x1024"}
+DEFAULT_MODEL = "gpt-image-1"
 
 
 def generate_image(
     prompt: str,
-    model: str = "dall-e-3",
+    model: str = DEFAULT_MODEL,
     size: str = "1024x1024",
     n: int = 1
 ) -> str:
