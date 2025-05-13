@@ -1,6 +1,7 @@
 import logging
 from aiogram import types, Dispatcher
 from aiogram.enums.chat_action import ChatAction
+from aiogram.filters import Command
 from openai_client import generate_image
 
 # Хэндлер для команд /start и /help
@@ -36,7 +37,8 @@ async def handle_prompt(message: types.Message):
     await message.bot.send_photo(chat_id=message.chat.id, photo=image_url)
 
 # Функция для регистрации хэндлеров
-
 def register_handlers(dp: Dispatcher):
-    dp.message.register(send_welcome, commands=['start', 'help'])
+    # Регистрация команды /start и /help через фильтр Command
+    dp.message.register(send_welcome, Command(commands=["start", "help"]))
+    # Основной обработчик всех остальных текстовых сообщений
     dp.message.register(handle_prompt)
