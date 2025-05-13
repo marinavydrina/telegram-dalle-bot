@@ -25,6 +25,10 @@ dp = Dispatcher()
 register_handlers(dp)
 
 async def main():
+    # Удаляем возможный webhook, чтобы начать long polling без конфликтов
+    await bot.delete_webhook(drop_pending_updates=True)
+    logging.info("Webhook deleted, starting polling...")
+
     # Запуск polling
     await dp.start_polling(bot, skip_updates=True)
 
