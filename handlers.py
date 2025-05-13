@@ -1,8 +1,6 @@
 # handlers.py
-
 import logging
-from aiogram import types
-from aiogram.dispatcher import Dispatcher
+from aiogram import types, Dispatcher
 from aiogram.types import ChatActions
 from openai_client import generate_image
 
@@ -39,6 +37,8 @@ async def handle_prompt(message: types.Message):
     await message.bot.send_photo(chat_id=message.chat.id, photo=image_url)
 
 # Функция для регистрации хэндлеров
+# Функция для регистрации хэндлеров
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(send_welcome, commands=['start', 'help'])
-    dp.register_message_handler(handle_prompt)
+    dp.message.register(send_welcome, commands=['start', 'help'])
+    dp.message.register(handle_prompt)
+
