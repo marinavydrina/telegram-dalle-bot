@@ -3,11 +3,8 @@ import logging
 import asyncio
 
 from aiogram import Bot, Dispatcher
-from aiogram.filters import Command
-from aiogram.enums.chat_action import ChatAction
 from aiogram.exceptions import TelegramConflictError
-from handlers import send_welcome, handle_prompt
-from openai_client import generate_image
+from handlers import register_handlers
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -24,14 +21,11 @@ if not TELEGRAM_TOKEN or not OPENAI_API_KEY:
 bot = Bot(token=TELEGRAM_TOKEN)
 dp = Dispatcher()
 
-# Регистрируем хэндлеры
-# /start и /help
-dp.message.register(send_welcome, Command(commands=["start", "help"]))
-# основной обработчик
-dp.message.register(handle_prompt)
+# Регистрация хэндлеров из handlers.py
+register_handlers(dp)
 
 async def main():
-    # Проверяем и удаляем любой webhook
+    # Удаляем возможный webhook
     try:
         info = await bot.get_webhook_info()
         logging.info(f"Current webhook URL: {info.url}")
@@ -41,14 +35,14 @@ async def main():
     except Exception as e:
         logging.warning(f"Failed to delete webhook: {e}")
 
-    # Запуск polling с перезапуском при конфликтах
+    # Запуск polling с обработкой конфликтов
     while True:
         try:
             logging.info("Starting long polling...")
             await dp.start_polling(bot, skip_updates=True)
             break
         except TelegramConflictError as conflict:
-            logging.warning(f"Conflict detected: {conflict}. Retrying after webhook deletion...")
+            logging.warning(f"Conflict detected: {conflict}. Retrying...")
             await bot.delete_webhook(drop_pending_updates=True)
         except Exception as e:
             logging.exception(f"Polling failed: {e}")

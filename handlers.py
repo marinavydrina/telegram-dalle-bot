@@ -5,40 +5,39 @@ from aiogram.filters import Command
 from openai_client import generate_image
 
 # Хэндлер для команд /start и /help
-async def send_welcome(message: types.Message):
-    await message.reply(
+def send_welcome(message: types.Message):
+    return message.reply(
         "👋 Привет! Напиши простым русским, что ты хочешь нарисовать, "
         "например: «нарисуй улыбающегося робота». Я буду использовать DALL·E-3 и пришлю картинку, как только она будет готова!"
     )
 
-# Хэндлер для обработки текстовых запросов-промптов
+# Хэндлер для обработки текстовых запросов-промптов (игнорирует команды)
 async def handle_prompt(message: types.Message):
+    # Отфильтровываем команды, чтобы не обрабатывать их как промпт
+    if message.text and message.text.startswith('/'):
+        return
+
     prompt = message.text.strip()
     if not prompt:
         return
 
-    # 1. Показать статус «рисую»
+    # Показываем индикатор загрузки
     await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_PHOTO)
 
-    # 2. Сгенерировать картинку
+    # Генерируем изображение
     try:
-        image_url = generate_image(
-            prompt=prompt,
-            model="dall-e-3",
-            size="512x512",
-            n=1
-        )
+        image_url = generate_image(prompt=prompt)
     except Exception:
         logging.exception("Ошибка при генерации изображения")
         await message.reply("😢 Упс, не получилось сгенерировать картинку. Попробуй чуть позже.")
         return
 
-    # 3. Отправить картинку
+    # Отправляем картинку
     await message.bot.send_photo(chat_id=message.chat.id, photo=image_url)
 
 # Функция для регистрации хэндлеров
 def register_handlers(dp: Dispatcher):
-    # Регистрация команды /start и /help через фильтр Command
+    # Приветствие на команды /start и /help
     dp.message.register(send_welcome, Command(commands=["start", "help"]))
-    # Основной обработчик всех остальных текстовых сообщений
-    dp.message.register(handle_prompt)
+    # Обработка остальных текстовых сообщений (не команд)
+    dp.message.register(handle_prompt, ~Command())
