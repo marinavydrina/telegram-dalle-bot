@@ -5,6 +5,7 @@ import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.enums.chat_action import ChatAction
+from aiogram.exceptions import TelegramConflictError
 from handlers import send_welcome, handle_prompt
 from openai_client import generate_image
 
@@ -41,7 +42,6 @@ async def main():
         logging.warning(f"Failed to delete webhook: {e}")
 
     # Запуск polling с перезапуском при конфликтах
-    from aiogram.exceptions import TelegramConflictError
     while True:
         try:
             logging.info("Starting long polling...")
@@ -53,3 +53,6 @@ async def main():
         except Exception as e:
             logging.exception(f"Polling failed: {e}")
             await asyncio.sleep(5)
+
+if __name__ == '__main__':
+    asyncio.run(main())
