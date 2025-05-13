@@ -1,34 +1,32 @@
-# app.py
 import os
 import logging
+import asyncio
 
-from aiogram import Bot, Dispatcher, types
-from aiogram.utils import executor
-import openai
-
-# Из нашего handlers.py
+from aiogram import Bot, Dispatcher
 from handlers import register_handlers
+import openai_client
 
-# Настройки логирования
+# Настройка логирования
 logging.basicConfig(level=logging.INFO)
 
-# Токены из окружения
+# Чтение токенов из окружения
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 if not TELEGRAM_TOKEN or not OPENAI_API_KEY:
-    logging.error("Не заданы TELEGRAM_BOT_TOKEN или OPENAI_API_KEY в окружении")
+    logging.error("Не заданы TELEGRAM_BOT_TOKEN или OPENAI_API_KEY")
     exit(1)
 
-# Инициализация клиентов
+# Инициализация бота и диспетчера
 bot = Bot(token=TELEGRAM_TOKEN)
-dp = Dispatcher(bot)
+dp = Dispatcher()
 
-openai.api_key = OPENAI_API_KEY
-
-# Регистрируем все хэндлеры из handlers.py
+# Регистрируем хэндлеры
 register_handlers(dp)
 
+async def main():
+    # Запуск polling
+    await dp.start_polling(bot, skip_updates=True)
+
 if __name__ == '__main__':
-    # Запуск long-polling
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())
