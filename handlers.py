@@ -1,6 +1,6 @@
 import logging
 from aiogram import types, Dispatcher
-from aiogram.enums import ChatActions
+from aiogram.enums.chat_action import ChatAction
 from openai_client import generate_image
 
 # Хэндлер для команд /start и /help
@@ -17,7 +17,7 @@ async def handle_prompt(message: types.Message):
         return
 
     # 1. Показать статус «рисую»
-    await message.bot.send_chat_action(message.chat.id, ChatActions.UPLOAD_PHOTO)
+    await message.bot.send_chat_action(chat_id=message.chat.id, action=ChatAction.UPLOAD_PHOTO)
 
     # 2. Сгенерировать картинку
     try:
