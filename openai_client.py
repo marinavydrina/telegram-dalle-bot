@@ -12,19 +12,25 @@ if not OPENAI_API_KEY:
 openai.api_key = OPENAI_API_KEY
 
 
+# Поддерживаемые размеры для DALL·E-3
+SUPPORTED_SIZES = {"1024x1024", "1024x1792", "1792x1024"}
+
+
 def generate_image(
     prompt: str,
     model: str = "dall-e-3",
-    size: str = "512x512",
+    size: str = "1024x1024",
     n: int = 1
 ) -> str:
     """
     Генерирует изображение по текстовому промпту через OpenAI DALL·E API.
 
+    Если передан неподдерживаемый размер, используется 1024x1024.
+
     Args:
         prompt: Текстовый запрос на любом языке.
         model: Название модели (dall-e-3 или dall-e-2).
-        size: Размер изображения, например "512x512".
+        size: Размер изображения.
         n: Количество изображений (обычно 1).
 
     Returns:
@@ -33,6 +39,11 @@ def generate_image(
     Raises:
         RuntimeError: При ошибке в API запросе.
     """
+    # Проверяем и корректируем размер
+    if size not in SUPPORTED_SIZES:
+        logging.warning(f"Unsupported size '{size}', fallback to '1024x1024'.")
+        size = "1024x1024"
+
     try:
         response = openai.Image.create(
             model=model,
